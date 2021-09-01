@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/person/{person_id}/room/{room_id}/message")
@@ -50,37 +51,32 @@ public class MessageController {
     @PutMapping("/")
     public Message updateMessage(@PathVariable int person_id,
                                  @PathVariable int room_id,
-                                 @RequestParam int id,
+                                 @RequestParam int message_id,
                                  @RequestBody Message update_text) {
         personService.findById(person_id).orElseThrow(NoSuchElementException::new);
         roomService.findById(room_id).orElseThrow(NoSuchElementException::new);
-        Message message = messageService.findById(id).orElseThrow(NoSuchElementException::new);
+        Message message = messageService.findById(message_id).orElseThrow(NoSuchElementException::new);
         message.setMessage(update_text.getMessage());
         messageService.saveOrUpdate(message);
         return message;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{message_id}")
     public Message findMessageById(@PathVariable int person_id,
                                    @PathVariable int room_id,
-                                   @PathVariable int id) {
+                                   @PathVariable int message_id) {
         personService.findById(person_id).orElseThrow(NoSuchElementException::new);
         roomService.findById(room_id).orElseThrow(NoSuchElementException::new);
-        Optional<Message> rsl = messageService.findById(id);
-        if (rsl.isPresent()) {
-            return rsl.get();
-        } else {
-            throw new NoSuchElementException("There is no Message with ID = " + id + " in DataBase");
-        }
+        return messageService.findById(message_id).orElseThrow(NoSuchElementException::new);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{message_id}")
     public void deleteMessageById(@PathVariable int person_id,
                                   @PathVariable int room_id,
-                                  @PathVariable int id) {
+                                  @PathVariable int message_id) {
         personService.findById(person_id).orElseThrow(NoSuchElementException::new);
         roomService.findById(room_id).orElseThrow(NoSuchElementException::new);
-        Optional<Message> rsl = messageService.findById(id);
+        Optional<Message> rsl = messageService.findById(message_id);
         rsl.ifPresent(message -> messageService.delete(message));
     }
 }
